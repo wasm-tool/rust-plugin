@@ -1,2 +1,3 @@
 # rust-plugin
-Rust plugin for Webpack
+
+> Rust plugin for Webpack

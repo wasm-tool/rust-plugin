@@ -1,0 +1,22 @@
+{
+  "name": "rust-plugin",
+  "version": "0.0.2",
+  "description": "Rust plugin for Webpack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xtuc/rust-plugin.git"
+  },
+  "author": "Sven Sauleau",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xtuc/rust-plugin/issues"
+  },
+  "homepage": "https://github.com/xtuc/rust-plugin#readme",
+  "dependencies": {
+    "tempy": "^0.2.1"
+  }
+}
