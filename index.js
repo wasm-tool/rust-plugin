@@ -8,16 +8,6 @@ const isWasm = n => extname(n) === ".wasm";
 
 const defaultOpts = {};
 
-function formatMessage(msg) {
-  let formatted = `(${msg.type}) ${msg.description}`;
-
-  if (msg.file && msg.lineNo >= 0) {
-    formatted = `${msg.file}:${msg.lineNo} ${formatted}`;
-  }
-
-  return formatted;
-}
-
 const compose = (...fns) =>
   fns.reverse().reduce((prevFn, nextFn) =>
     value => nextFn(prevFn(value)),
