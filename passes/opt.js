@@ -3,7 +3,11 @@ const which = require("which");
 
 const cwd = process.cwd();
 
-function wasmopt({filename, debug, warn}) {
+function wasmopt({options, filename, debug, warn}) {
+  const {
+    level = "z"
+  } = options.wasmopt;
+
   const bin = which.sync("wasm-opt", {nothrow: true});
 
   if (bin === null) {
@@ -18,6 +22,7 @@ function wasmopt({filename, debug, warn}) {
 
   const command = [
     bin,
+    "-O" + level,
     "-o", filename,
     filename
   ].join(" ");

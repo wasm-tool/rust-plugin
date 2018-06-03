@@ -7,7 +7,9 @@ const {wasmopt} = require("./passes/opt.js");
 const isWasm = n => extname(n) === ".wasm";
 
 const defaultOpts = {
-  debug: false
+  debug: false,
+
+  wasmopt: {}
 };
 
 function createRunner(compilation, options, bin /*: Buffer */) {
@@ -17,6 +19,7 @@ function createRunner(compilation, options, bin /*: Buffer */) {
 
   return {
     filename,
+    options,
 
     debug(...msg /*: Array<string> */) {
       if (options.debug === true) {
