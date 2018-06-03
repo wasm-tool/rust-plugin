@@ -1,72 +1,58 @@
-const {extname, join} = require("path");
+const {extname} = require("path");
 const tempy = require('tempy');
-const {writeFile, readFileSync, unlinkSync} = require('fs');
-const {exec} = require("child_process");
+const {writeFileSync, readFileSync, unlinkSync} = require('fs');
 
-const cwd = process.cwd();
+const {wasmopt} = require("./passes/opt.js");
+
 const isWasm = n => extname(n) === ".wasm";
 
-const defaultOpts = {};
+const defaultOpts = {
+  debug: false
+};
 
-const compose = (...fns) =>
-  fns.reverse().reduce((prevFn, nextFn) =>
-    value => nextFn(prevFn(value)),
-    value => value
-  );
-
-function emit(compilation, filename, bin) {
-  compilation.assets[filename] = {
-    source: () => bin,
-    size: () => bin.byteLength
-  };
-}
-
-function toTmpFile(buff) {
+function createRunner(compilation, options, bin /*: Buffer */) {
   const filename = tempy.file({extension: 'wasm'});
 
-  return new Promise(resolve => {
-    writeFile(filename, new Buffer(buff), () => resolve(filename));
-  });
-}
+  writeFileSync(filename, new Buffer(bin));
 
-function wasmopt(filename) {
-  return new Promise((resolve, reject) => {
-    const command = [
-      "wasm-opt",
-      "-o", filename,
-      filename
-    ].join(" ");
+  return {
+    filename,
 
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        return reject(error);
+    debug(...msg /*: Array<string> */) {
+      if (options.debug === true) {
+        console.log(...msg);
       }
+    },
 
-      resolve(filename);
-    });
-  });
+    warn(msg /*: string */) {
+      compilation.warnings.push(new Error(msg));
+    },
+
+    runPasses(passFn /*: Array<Function> */)/*: Promise */ {
+      const promises = passFn.reduce((acc, fn) => {
+        acc.push(fn(this));
+        return acc;
+      }, []);
+
+      return Promise.all(promises);
+    },
+
+    get() /*: Buffer */ {
+      const buff = readFileSync(filename, null);
+      unlinkSync(filename);
+
+      return buff;
+    }
+  }
 }
 
-function readAndClean(filename) {
-  const buff = readFileSync(filename, null);
-  unlinkSync(filename);
-
-  return Promise.resolve(buff);
-}
-
-function runPipeline(bin) {
-  return toTmpFile(bin)
-    .then(wasmopt)
-    .then(readAndClean);
-}
-
-module.exports = class RustPlugin {
-  construtor(options = {}) {
+module.exports = class {
+  constructor(options = {}) {
     this._options = Object.assign({}, defaultOpts, options);
   }
 
   apply(compiler) {
-    compiler.plugin("emit", function(compilation, ok) {
+    compiler.plugin("emit", (compilation, ok) => {
       const processes = [];
 
       for (const name in compilation.assets) {
@@ -76,9 +62,23 @@ module.exports = class RustPlugin {
 
         const cachedSource = compilation.assets[name];
 
-        const p = runPipeline(cachedSource.source())
+        const runner = createRunner(
+          compilation,
+          this._options,
+          cachedSource.source()
+        );
+
+        const p = runner.runPasses([
+          wasmopt
+        ])
+          .then(runner.get)
           .then(newBin => {
-            emit(compilation, name, newBin);
+
+            // Emit the new binary
+            compilation.assets[name] = {
+              source: () => newBin,
+              size: () => newBin.byteLength
+            };
           })
           .catch(err => {
             compilation.errors.push(err);

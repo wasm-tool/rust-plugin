@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/xtuc/rust-plugin#readme",
   "dependencies": {
-    "tempy": "^0.2.1"
+    "tempy": "^0.2.1",
+    "which": "^1.3.1"
   }
 }
