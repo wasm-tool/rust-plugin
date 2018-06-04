@@ -18,9 +18,9 @@ function wasmsnip({options, filename, debug, warn}) {
   }
 
   const {
-    snipRustPanickingCode,
-    snipRustFmtCode,
-    functions
+    snipRustPanickingCode = false,
+    snipRustFmtCode = false,
+    functions = []
   } = options.wasmsnip;
 
   return new Promise((resolve, reject) => {
