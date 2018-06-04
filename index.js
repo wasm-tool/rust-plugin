@@ -3,6 +3,7 @@ const tempy = require('tempy');
 const {writeFileSync, readFileSync, unlinkSync} = require('fs');
 
 const {wasmopt} = require("./passes/wasmopt.js");
+const {wasmsnip} = require("./passes/wasmsnip.js");
 
 const isWasm = n => extname(n) === ".wasm";
 
@@ -72,7 +73,8 @@ module.exports = class {
         );
 
         const p = runner.runPasses([
-          wasmopt
+          wasmopt,
+          wasmsnip
         ])
           .then(runner.get)
           .then(newBin => {
