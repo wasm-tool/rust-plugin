@@ -2,7 +2,7 @@ const {extname} = require("path");
 const tempy = require('tempy');
 const {writeFileSync, readFileSync, unlinkSync} = require('fs');
 
-const {wasmopt} = require("./passes/opt.js");
+const {wasmopt} = require("./passes/wasmopt.js");
 
 const isWasm = n => extname(n) === ".wasm";
 
