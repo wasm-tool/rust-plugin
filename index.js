@@ -10,7 +10,8 @@ const isWasm = n => extname(n) === ".wasm";
 const defaultOpts = {
   debug: false,
 
-  wasmopt: {}
+  wasmopt: {},
+  wasmsnip: false
 };
 
 function createRunner(compilation, options, bin /*: Buffer */) {

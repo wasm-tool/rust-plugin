@@ -9,10 +9,18 @@ const binaryNotFound = (
 );
 
 function wasmsnip({options, filename, debug, warn}) {
+
+  // Plugin is not configured, ignore
+  if (options.wasmsnip === false) {
+    debug("wasmsnip is not configured; skipping");
+
+    return Promise.resolve();
+  }
+
   const {
-    snipRustPanickingCode = true,
-    snipRustFmtCode = true,
-    functions = []
+    snipRustPanickingCode,
+    snipRustFmtCode,
+    functions
   } = options.wasmsnip;
 
   return new Promise((resolve, reject) => {
