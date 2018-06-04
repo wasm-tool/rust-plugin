@@ -14,6 +14,7 @@ yarn add rust-plugin
 |--------|-------------|
 | `debug` | Enable debug mode |
 | `wasmopt.level` | configure `wasm-opt` optimization level (default `z`) |
+| `wasmopt.required` | throw if the binary is not available (default `false`: warn) |
 
 ## Example
 
