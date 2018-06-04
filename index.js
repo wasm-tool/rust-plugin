@@ -3,13 +3,15 @@ const tempy = require('tempy');
 const {writeFileSync, readFileSync, unlinkSync} = require('fs');
 
 const {wasmopt} = require("./passes/wasmopt.js");
+const {wasmsnip} = require("./passes/wasmsnip.js");
 
 const isWasm = n => extname(n) === ".wasm";
 
 const defaultOpts = {
   debug: false,
 
-  wasmopt: {}
+  wasmopt: {},
+  wasmsnip: false
 };
 
 function createRunner(compilation, options, bin /*: Buffer */) {
@@ -72,7 +74,8 @@ module.exports = class {
         );
 
         const p = runner.runPasses([
-          wasmopt
+          wasmopt,
+          wasmsnip
         ])
           .then(runner.get)
           .then(newBin => {
