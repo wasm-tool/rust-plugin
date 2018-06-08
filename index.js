@@ -2,17 +2,9 @@ const {extname} = require("path");
 const tempy = require('tempy');
 const {writeFileSync, readFileSync, unlinkSync} = require('fs');
 
-const {wasmopt} = require("./passes/wasmopt.js");
-const {wasmsnip} = require("./passes/wasmsnip.js");
+const presetDebug = require("./presets/debug");
 
 const isWasm = n => extname(n) === ".wasm";
-
-const defaultOpts = {
-  debug: false,
-
-  wasmopt: {},
-  wasmsnip: false
-};
 
 function createRunner(compilation, options, bin /*: Buffer */) {
   const filename = tempy.file({extension: 'wasm'});
@@ -53,7 +45,9 @@ function createRunner(compilation, options, bin /*: Buffer */) {
 
 module.exports = class {
   constructor(options = {}) {
-    this._options = Object.assign({}, defaultOpts, options);
+    // take configure fn based on the env
+    this._options = presetDebug.configureOptions(options);
+    this._passes = presetDebug.configurePasses(options);
   }
 
   apply(compiler) {
@@ -73,10 +67,7 @@ module.exports = class {
           cachedSource.source()
         );
 
-        const p = runner.runPasses([
-          wasmopt,
-          wasmsnip
-        ])
+        const p = runner.runPasses(this._passses)
           .then(runner.get)
           .then(newBin => {
 
