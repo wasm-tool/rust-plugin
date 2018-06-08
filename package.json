@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xtuc/rust-plugin.git"
+    "url": "git+https://github.com/wasm-tool/rust-plugin.git"
   },
   "author": "Sven Sauleau",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xtuc/rust-plugin/issues"
+    "url": "https://github.com/wasm-tool/rust-plugin/issues"
   },
-  "homepage": "https://github.com/xtuc/rust-plugin#readme",
+  "homepage": "https://github.com/wasm-tool/rust-plugin#readme",
   "dependencies": {
     "tempy": "^0.2.1",
     "which": "^1.3.1"
