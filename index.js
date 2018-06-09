@@ -2,9 +2,16 @@ const {extname} = require("path");
 const tempy = require('tempy');
 const {writeFileSync, readFileSync, unlinkSync} = require('fs');
 
-const presetDebug = require("./presets/debug");
+const getPreset = n => require(`./presets/${n}.js`);
 
 const isWasm = n => extname(n) === ".wasm";
+
+const defaultOpts = {
+  debug: false,
+
+  wasmopt: {},
+  wasmsnip: false
+};
 
 function createRunner(compilation, options, bin /*: Buffer */) {
   const filename = tempy.file({extension: 'wasm'});
@@ -17,12 +24,17 @@ function createRunner(compilation, options, bin /*: Buffer */) {
 
     debug(...msg /*: Array<string> */) {
       if (options.debug === true) {
-        console.log(...msg);
+        console.log("debug", ...msg);
       }
     },
 
     warn(msg /*: string */) {
-      compilation.warnings.push(new Error(msg));
+      // warnings are not showned by Webpack is production, so we log directly instead
+      if (options.env === "production") {
+        console.warn(msg);
+      } else {
+        compilation.warnings.push(new Error(msg));
+      }
     },
 
     runPasses(passFn /*: Array<Function> */)/*: Promise */ {
@@ -45,13 +57,40 @@ function createRunner(compilation, options, bin /*: Buffer */) {
 
 module.exports = class {
   constructor(options = {}) {
-    // take configure fn based on the env
-    this._options = presetDebug.configureOptions(options);
-    this._passes = presetDebug.configurePasses(options);
+    this._options = Object.assign({}, defaultOpts, options);
+  }
+
+  _configure(webpackMode, warn) {
+    let env = "production";
+
+    if (webpackMode === "development") {
+      env = "debug";
+    }
+
+    if (env === "production" && this._options.profiling === true) {
+      warn("You are profiling a production build, this might not be intended.");
+    }
+
+    if (this._options.profiling === true) {
+      env = "profiling";
+    }
+
+    const {configureOptions, configurePasses} = getPreset(env);
+
+    this._options.env = env;
+
+    this._options = configureOptions(this._options);
+    this._passes = configurePasses(this._options);
   }
 
   apply(compiler) {
     compiler.plugin("emit", (compilation, ok) => {
+
+      this._configure(
+        compiler.options.mode,
+        msg => compilation.warnings.push(new Error(msg))
+      );
+
       const processes = [];
 
       for (const name in compilation.assets) {
@@ -67,7 +106,7 @@ module.exports = class {
           cachedSource.source()
         );
 
-        const p = runner.runPasses(this._passses)
+        const p = runner.runPasses(this._passes)
           .then(runner.get)
           .then(newBin => {
 

@@ -13,6 +13,7 @@ yarn add rust-plugin
 | name   | description |
 |--------|-------------|
 | `debug` | Enable debug mode |
+| `profiling` | Enable profiling mode |
 | `wasmopt.level` | configure `wasm-opt` optimization level (default `z`) |
 | `wasmopt.required` | throw if the binary is not available (default `false`: warn) |
 | `wasmsnip.snipRustPanickingCode` | Snip Rust's `std::panicking` and `core::panicking` code |
@@ -29,6 +30,7 @@ module.exports = {
   plugins: [
     new RustPlugin({
         debug: true,
+        profiling: false,
         wasmopt: {
             level: '0'
         }

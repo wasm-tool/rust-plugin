@@ -1,8 +1,9 @@
-export function configureOptions(options = {}) {
+function configureOptions(options = {}) {
   return options;
 }
 
-export function configurePasses(options = {}) {
+function configurePasses(options = {}) {
   return [];
 }
 
+module.exports = { configureOptions, configurePasses };
